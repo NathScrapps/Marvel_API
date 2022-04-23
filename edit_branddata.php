@@ -23,6 +23,9 @@ if (isset($_GET['id'])) {
     }
 }
 
+require_once './assets/complements/conexion.php';
+
+$claseDatabase = new Database();
 if (isset($_POST['update'])) {
     $id=$_GET['id'];
     $name = filter_var($_POST['sucursal'], FILTER_SANITIZE_STRING);
@@ -31,7 +34,7 @@ if (isset($_POST['update'])) {
     $cierra = $_POST['hcierra'];
 
     try {
-        $conexion = new  PDO('mysql:host=localhost;dbname=gest_comics', 'root', '');
+        $conexion = $claseDatabase->getConnection();
     } catch (PDOException $e) {
         echo "Error: " . $e->getMessage();
     }

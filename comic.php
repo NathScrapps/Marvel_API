@@ -1,53 +1,30 @@
 <?php 
+require_once './assets/complements/conexion.php';
+$claseDatabase = new Database();
 
-$errores ='';
-$host = "localhost";
-$usuario = "root";
-$pass = "";
-$dbName = "gest_comics";
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
     $reg = $_GET['id_sucursal'];
     try {
-        $con= mysqli_connect($host, $usuario, $pass, $dbName);
+        $db = $claseDatabase->getConnection();
     } catch (PDOException $e) {
         echo "Error: " . $e->getMessage();
     }
-    $query = "SELECT * FROM inventario WHERE id_comic = $id";
-    $result = mysqli_query($con, $query);
-    if (mysqli_num_rows($result) == 1) {
-        $row = mysqli_fetch_array($result);
-        $comic_id = $row['id_comic'];
-        $comic_title = $row['title'];
-        $comic_description = $row['descripcion'];
-        $comic_pages = $row['pagenums'];
-        $comic_imagen = $row['imagen'];
-        $comic_sucursal = $row['id_sucursal'];
-    }
-
-    try {
-        $db = new  PDO('mysql:host=localhost;dbname=gest_comics', 'root', '');
-    } catch (PDOException $e) {
-        echo "Error: " . $e->getMessage();
-    }
-    $sucursales = $db->prepare('SELECT * FROM sucursales WHERE id = :id_sucursal');
-    $sucursales->execute(array('id_sucursal'=>$comic_sucursal));
-    $sucursales = $sucursales->fetchAll();
+    $comic_details_on_branch = $db->prepare('SELECT * FROM inventario WHERE id_comic = :id AND id_sucursal = :branch_id');
+    $comic_details_on_branch->execute(array(':id'=>$id, ':branch_id'=>$reg));
+    $comic_details = $comic_details_on_branch->fetch();
+    // var contains values of query
+    $comic_id = $comic_details['id_comic'];
+    $comic_title = $comic_details['title'];
+    $comic_description = $comic_details['descripcion'];
+    $comic_pages = $comic_details['pagenums'];
+    $comic_imagen = $comic_details['imagen'];
+    $comic_sucursal = $comic_details['id_sucursal']; 
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="./assets/imgSource/logo.png" type="image/x-icon">
-    <link href='https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css' rel='stylesheet'>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <link rel="stylesheet" href="./assets/css/styles.css">
-    <title>Cómics - Marvel</title>
-</head>
-<body>
+
+<?php require_once './assets/complements/header.php';?>
+<body style="background-color: #040726;">
 <div class="header">
     <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
       <div class="d-flex align-items-center mb-3 mb-md-0 me-md-auto">
@@ -85,72 +62,59 @@ if (isset($_GET['id'])) {
                 <p class="card-text"><?php echo ucfirst($comic_description);?></p>
                 <p class="card-text text-info"><?php echo 'No.páginas:'.$comic_pages;?></p>
             </div>
-            <p class="card-text align-items-end mt-auto" >
-                <small class="text-muted">
-                    Disponible en:
-                    <?php foreach($sucursales as $sucursal):?>
-                        <a href="Comics_branch.php?id=<?php echo $sucursal['id']; ?>"><?php echo $sucursal['sucursal']; ?></a>
-                    <?php endforeach;?>
-                </small></p>
+            <p class="card-text align-items-end mt-auto">
+                <?php require_once './assets/complements/comic_price_API.php';?>
+
+                <?php foreach($comic_json->data->results as $price_com):?>
+                    <?php $comic_price = ($price_com->prices[0]->price);?>
+                <small class="text-muted">Precio: <?php echo "USD ".$comic_price;?></small>
+                <?php endforeach; ?>
+            </p>
         </div>
         </div>
     </div>
     </div>
 </section>
 
-<?php
-$url = "https://gateway.marvel.com:443/v1/public/comics/$comic_id/characters?orderBy=name&limit=52&ts=1&apikey=d08578d6407e27408beb952d33978d92&hash=9c38532a5b99818bcf7d8d1ee7a297c5";
-$opciones=array(
-    "ssl"=>array(
-        "verify_peer"=>false,"verify_peer_name"=>false
-    )
-);
+<?php require_once './assets/complements/character_comicAPI.php';?>
 
-$respuesta = file_get_contents($url,false,stream_context_create($opciones));
-$objComic = json_decode($respuesta);
-function changeImg($personThumb,$extenImg){
-    $replaceimg = './assets/imgSource/dummy.jpg';
-    $imgPerson = "$personThumb.$extenImg";  
-    $restar = substr($personThumb, -19);
-    if ($restar == 'image_not_available') {
-        return $replaceimg;
-    }else {
-        return $imgPerson;
-    }
-}
-?>
-
-<aside class="d-flex justify-content-center m-5">
-    <div class="edit__section-title">
-        <a href="index.php" style="text-decoration:none;"><h1 class="edit__title">Personajes </h1></a>
-    </div>
-</aside>
-<section class="container__brand_personaje">
-    <?php foreach($objComic->data->results as $personaje): ?>
-        <?php 
-        $personid = $personaje->id;
-        $personname = $personaje->name;
-        $persondesc = $personaje->description;
-        $personcomics = $personaje->comics->available;
-        $personThumb = ($personaje->thumbnail->path);
-        $extenImg = ($personaje->thumbnail->extension);   
-        $functiochange = changeImg($personThumb,$extenImg);
-        ?>
-
-    <div class="card__brand card0" style="background: url(<?php echo $functiochange?>)center center no-repeat;background-size: 300px;">   
-        <div class="card__brand-border">
-            <h4><?php echo $personname ?></h4>
-            <div class="card__brand-content" style="top: 180px;left: 47px;">
-                <a><?php echo $persondesc;?></a>
+<?php if($objComic->data->total == 0):?>
+    <aside class="d-flex justify-content-center m-5">
+        <div class="edit__section-title">
+            <a style="text-decoration:none;"><h1 class="edit__title">No se encontraron personajes</h1></a>
+        </div>
+    </aside>
+<?php else: ?>    
+    <aside class="d-flex justify-content-center m-5">
+        <div class="edit__section-title">
+            <a style="text-decoration:none;"><h1 class="edit__title">Personajes </h1></a>
+        </div>
+    </aside>
+    <section class="container__brand_personaje">
+        <?php foreach($objComic->data->results as $personaje): ?>
+            <?php 
+            $personid = $personaje->id;
+            $personname = $personaje->name;
+            $persondesc = $personaje->description;
+            $personcomics = $personaje->comics->available;
+            $personThumb = ($personaje->thumbnail->path);
+            $extenImg = ($personaje->thumbnail->extension);   
+            $functiochange = changeImg($personThumb,$extenImg);
+            ?>
+        <div class="card__character">
+            <div class="card-img__character">
+                <img src="<?php echo $functiochange?>" alt="">
             </div>
-            <a style="font-size:11px;"><?php echo "Personaje en $personcomics cómics.";?> </a>
+            <div class="card-info__character">
+                <p class="title__character"><?php echo $personname ?></p>
+                <p class="subtitle__character"><?php echo filter_var($persondesc, FILTER_SANITIZE_STRING);?></p>
+                <small class="note__character"><?php echo "Personaje en $personcomics cómics.";?> </small>
+            </div>
         </div>
-    </div>
-    <?php endforeach; ?>
-</section>
-
-
-    <a class="btn btn___regresar" href="./Comics_branch.php?id=<?php echo $reg;?>">Regresar</a>
+        <?php endforeach; ?>
+    </section>
+<?php endif;?>
+<a class="btn btn___regresar" href="./Comics_branch.php?id=<?php echo $reg;?>"><i class="las la-long-arrow-alt-left" style="margin-right:5px;"></i>Regresar</a>
 <?php 
     require_once './assets/complements/footer.php';
 ?>

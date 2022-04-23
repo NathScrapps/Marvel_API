@@ -1,8 +1,10 @@
 <?php
+require_once './assets/complements/conexion.php';
+$claseDatabase = new Database();
     if (isset($_GET['id'])) {
         $id = $_GET['id'];
         try {
-            $conexion = new  PDO('mysql:host=localhost;dbname=gest_comics', 'root', '');
+            $conexion = $claseDatabase->getConnection();
         } catch (PDOException $e) {
             echo "Error: " . $e->getMessage();
         }

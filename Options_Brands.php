@@ -1,9 +1,8 @@
 <?php
+require_once './assets/complements/conexion.php';
+$claseDatabase = new Database();
+
 $errores ='';
-$host = "localhost";
-$usuario = "root";
-$pass = "";
-$dbName = "gest_comics";
     if($_SERVER['REQUEST_METHOD'] == 'POST') {
         $sucursal = filter_var($_POST['sucursal'], FILTER_SANITIZE_STRING);
         $direccion =  filter_var($_POST['direccion'], FILTER_SANITIZE_STRING);
@@ -17,7 +16,7 @@ $dbName = "gest_comics";
                         </div>";
         }else {
             try {
-                $db = new PDO("mysql:host=$host;dbname=$dbName;charset=utf8;",$usuario,$pass);
+                $db = $claseDatabase->getConnection();
             } catch (PDOException $e) {
                 $errores .= $e->getMessage();
             }
@@ -35,4 +34,15 @@ $dbName = "gest_comics";
         header('Location: Options_Brands.php');
         
     }
+
+
+try {
+    $db = $claseDatabase->getConnection();
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
+$sucursales = $db->prepare('SELECT * FROM sucursales');
+$sucursales->execute();
+$sucursales = $sucursales->fetchAll();
+
 include './assets/views/options_brands.view.php';

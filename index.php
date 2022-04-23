@@ -1,37 +1,22 @@
 <?php
-// $url = 'https://gateway.marvel.com:443/v1/public/characters?ts=1&apikey=d08578d6407e27408beb952d33978d92&hash=9c38532a5b99818bcf7d8d1ee7a297c5';
-// $opc=array(
-//     "ssl"=>array(
-//         "verify_peer"=>false,"verify_peer_name"=>false
-//     )
-// );
+require_once './assets/complements/conexion.php';
+    $claseDatabase = new Database();
+    try {
+        $db = $claseDatabase->getConnection();
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+    }
+    $sucursales = $db->prepare('SELECT * FROM sucursales');
+    $sucursales->execute();
+    $sucursales = $sucursales->fetchAll();
+    
 
-// $response = file_get_contents($url,false,stream_context_create($opc));
-// $objRes = json_decode($response);
-// $carousel=0;
+    $count = $db->prepare('SELECT * FROM sucursales');
+    $count->execute();
+    $count = $count ->rowCount();
 
-// foreach ($objRes->data->results as $character) {
-//     $carousel++;
-//     $pathChar = $character->thumbnail->path;
-//     $extChar = $character->thumbnail->extension;
-//     echo    "<img src='$pathChar.$extChar' alt='' width='100'><br/>";
-//     echo "id: ".  $character->id.'<br/>';
-//     echo    "name:".$character->name.'<br/>';
-//     echo    "description:".$character->description.'<br/>';
-//     if ($carousel == 4) {
-//         break;
-//     }
-// }
-/*Aun no */
-// function changeImgNF($urlThumbImg,$extImg){
-//     $replace = './assets/imgSource/dummy.jpg';
-//     $imgOffic = "$urlThumbImg.$extImg";  
-//     $rest = substr($urlThumbImg, -19);
-//     if ($rest == 'image_not_available') {
-//         return $replace;
-//     }else {
-//         return $imgOffic;
-//     }
-// }
+    $count_invent = $db->prepare('SELECT * FROM inventario');
+    $count_invent->execute();
+    $count_invent = $count_invent ->rowCount();
 
 require_once './assets/views/index.view.php';
