@@ -21,11 +21,13 @@ Para trabajar con la APP, se precisa tener acceso a la propia API, por lo cual, 
 4. Una vez tenemos el hash, lo agregaremos reemplazando los valores de la ***URL*** que obtenemos en el apartado [documentación interactiva](https://developer.marvel.com/docs) , llamada "***Request URL***", realizando una consulta a cualquier API Get que nos proporciona este apartado (click sobre la API, dirigirse hasta la parte de abajo de la misma sección de la API y hacer click sobre el botón "***Try it out!***"), en este proyecto se realizó a la API "***v1/public/comics***", tal que el resultado fue:
 	* https://gateway.marvel.com:443/v1/public/comics?apikey=
 	> Esta es la estructura base de la URL usada para este proyecto.
+	> El access point de la URL se estructura después del símbolo "***?***" y nuestras claves deben usarse asi:
+		> - ?ts=tu_valor_asignado&apikey=tu_public_key&hash=la_combinacion_hasheada
 5. Ahora que ya tenemos los valores necesarios y los conocimientos sobre los mismos, acceder a los siguientes documentos para colocar tus propias claves y valores:
 	- assets\complements\comic_price_API.php
 	- assets\complements\character_comicAPI.php
 	- assets\complements\api_comic.php
-	> Ejemplo: https://gateway.marvel.com:443/v1/public/comics?ts=1&apikey=d08578d6407e408beb952d33978d92
+	> Ejemplo: https://gateway.marvel.com:443/v1/public/comics?ts=1&apikey=d08578d6407e408beb952d33978d92&hash=9c38532a5b99818bcf7d8
  
 ## Para trabajar la base de datos:
 1. Crear una base de datos con el nombre "***gest_comics***", e importar la base de datos anexada en la carpeta "***assets/bd/***".
