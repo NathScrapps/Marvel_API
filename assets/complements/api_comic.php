@@ -1,6 +1,6 @@
 <?php
 /* Direccion de dónde vamos a consumir los datos */
-$url = "https://gateway.marvel.com:443/v1/public/comics?format=comic&orderBy=title&limit=52&ts=$YOUR_TS_VALUE&apikey=$YOUR_HASH_MD5_VALUE";
+$url = "https://gateway.marvel.com:443/v1/public/comics?format=comic&orderBy=title&limit=52&ts=$YOUR_TS_VALUE&apikey=$YOUR_PUBLIC_KEY&hash=$YOUR_HASH_MD5_VALUE";
 $opciones=array(
     "ssl"=>array(
         "verify_peer"=>false,"verify_peer_name"=>false
